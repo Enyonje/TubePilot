@@ -1,0 +1,16 @@
+{
+  "name": "@tubepilot/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": { ".": "./src/index.js" },
+  "scripts": {
+    "generate": "prisma generate",
+    "postinstall": "prisma generate",
+    "migrate:dev": "dotenv -e ../../.env -- prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "studio": "dotenv -e ../../.env -- prisma studio"
+  },
+  "dependencies": { "@prisma/client": "^6.0.0" },
+  "devDependencies": { "dotenv-cli": "^7.4.2", "prisma": "^6.0.0" }
+}

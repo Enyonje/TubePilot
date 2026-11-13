@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://tubepilot:tubepilot@localhost:5432/tubepilot?schema=public
+      REDIS_URL: redis://localhost:6379
+      APP_URL: http://localhost:3000
+      AUTH_SECRET: ci-only-secret-ci-only-secret-ci-only-secret
+      ENCRYPTION_KEY: 0000000000000000000000000000000000000000000000000000000000000000
+      GOOGLE_CLIENT_ID: ci-client-id
+      GOOGLE_CLIENT_SECRET: ci-client-secret
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: tubepilot
+          POSTGRES_PASSWORD: tubepilot
+          POSTGRES_DB: tubepilot
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U tubepilot" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping" --health-interval 5s
+          --health-timeout 3s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      # Switch to --frozen-lockfile once pnpm-lock.yaml is committed.
+      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm --filter @tubepilot/database exec prisma validate
+      - run: pnpm --filter @tubepilot/database exec prisma migrate deploy
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm --filter @tubepilot/web build

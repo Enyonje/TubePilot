@@ -1,0 +1,21 @@
+{
+  "name": "@tubepilot/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --env-file=../../.env src/index.js",
+    "start": "node src/index.js",
+    "smoke": "node --env-file=../../.env scripts/smoke.js"
+  },
+  "dependencies": {
+    "@tubepilot/config": "workspace:*",
+    "@tubepilot/database": "workspace:*",
+    "@tubepilot/media": "workspace:*",
+    "@tubepilot/pipeline": "workspace:*",
+    "@tubepilot/research": "workspace:*",
+    "@tubepilot/shared": "workspace:*",
+    "@tubepilot/youtube": "workspace:*",
+    "bullmq": "^5.34.0"
+  }
+}
